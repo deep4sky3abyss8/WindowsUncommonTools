@@ -151,7 +151,7 @@ static int reset_btms(void){
 
 #define     HIJACK_FULL_SCREEN          Force_Full_screen();
 #define     HIJACK_MINIMIZE_BTM         Force_Block_Minimize();
-#define     HIJACK_MAXIMIZE_bmt         Force_Block_Maximize();
+#define     HIJACK_MAXIMIZE_BTM         Force_Block_Maximize();
 #define     HIJACK_CLOSE_BTM            Force_Block_Close();
 #define     RESET_HIJACKING             reset_btms();
 

@@ -24,10 +24,10 @@ Usage Exp :
 
     #include "./PATH to /WndHijack.h"
 
-    int status = HIJACK_CLOSE_btm
+    int status = HIJACK_CLOSE_BTM
 
     if ( status ){
-        Printf(" now try to close prg by btm [X]... ");
+        Printf(" now try to close prg by BTM [X]... ");
         RESET_HIJACKING
     }
 
@@ -43,15 +43,21 @@ Deep4SkyAbyss
 
 #define HIJACKED 1;
 
+static HWND hwnd = NULL ;
+static int  seen = 0 ;
+
 //------------------------------------------------------------
 
 static int Force_Full_screen(void){
 
     // -> getting manual terminal wnd handel
-    HWND hwnd = GetConsoleWindow() ;
-    
-    if ( hwnd ) 
+    if ( !seen )
+        hwnd = GetConsoleWindow() ;
+        
+    if ( hwnd ){
+        seen = 1 ;
         SendMessage( hwnd , WM_SYSCOMMAND , SC_MAXIMIZE , 0 );
+    }
 
     else        
         return 0 ;
@@ -62,8 +68,12 @@ static int Force_Full_screen(void){
 
 static int Force_Block_Minimize(void){
 
-    HWND hwnd = GetConsoleWindow();
-    if ( hwnd ) {
+    // -> getting manual terminal wnd handel
+    if ( !seen )
+        hwnd = GetConsoleWindow() ;
+        
+    if ( hwnd ){
+        seen = 1 ;
         HMENU hmenu = GetSystemMenu(hwnd , FALSE );
         
         if ( hmenu )    
@@ -79,8 +89,12 @@ static int Force_Block_Minimize(void){
 
 static int Force_Block_Maximize(void){
 
-    HWND hwnd = GetConsoleWindow();
-    if ( hwnd ) {
+    // -> getting manual terminal wnd handel
+    if ( !seen )
+        hwnd = GetConsoleWindow() ;
+        
+    if ( hwnd ){
+        seen = 1 ;
         HMENU hmenu = GetSystemMenu(hwnd , FALSE );
         
         if ( hmenu ){  
@@ -98,8 +112,12 @@ static int Force_Block_Maximize(void){
 
 static int Force_Block_Close(void){
 
-    HWND hwnd = GetConsoleWindow();
-    if ( hwnd ) {
+    // -> getting manual terminal wnd handel
+    if ( !seen )
+        hwnd = GetConsoleWindow() ;
+        
+    if ( hwnd ){
+        seen = 1 ;
         HMENU hmenu = GetSystemMenu(hwnd , FALSE );
         
         if ( hmenu )    
@@ -115,10 +133,16 @@ static int Force_Block_Close(void){
 
 static int reset_btms(void){
 
-    HWND hwnd = GetConsoleWindow();
-
-    if ( hwnd )     GetSystemMenu( hwnd , TRUE ) ;
-    else            return 0 ;
+    // -> getting manual terminal wnd handel
+    if ( !seen )
+        hwnd = GetConsoleWindow() ;
+        
+    if ( hwnd ){
+        seen = 1 ;     
+        GetSystemMenu( hwnd , TRUE ) ;
+    }
+    else            
+        return 0 ;
 
     return 1;
 }
@@ -126,9 +150,9 @@ static int reset_btms(void){
 
 
 #define     HIJACK_FULL_SCREEN          Force_Full_screen();
-#define     HIJACK_MINIMIZE_btm         Force_Block_Minimize();
+#define     HIJACK_MINIMIZE_BTM         Force_Block_Minimize();
 #define     HIJACK_MAXIMIZE_bmt         Force_Block_Maximize();
-#define     HIJACK_CLOSE_btm            Force_Block_Close();
+#define     HIJACK_CLOSE_BTM            Force_Block_Close();
 #define     RESET_HIJACKING             reset_btms();
 
 

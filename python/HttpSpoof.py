@@ -68,7 +68,7 @@ class SpoofHttpRequest :
         self.method     = "HEAD" if method=="HEAD" else "GET" 
         self.connection = "keep-alive" if conn_type=="keep-alive" else "close"
 
-        
+        self.encode     = False
         if allow_encode :
             self.encode = True
         

@@ -54,21 +54,26 @@ from urllib.parse import urlparse
 class SpoofHttpRequest :
     
     
-    def __init__(self, url="google.com", platform="android" , method=None, conn_type="keep-alive" ) :
+    def __init__(self, url="google.com", platform="android" , method=None, conn_type="keep-alive", allow_encode=False ) :
         
+
+        self.url        = url
+        self.platform   = platform
+        self.path       = urlparse(self.url).path
+        self.host       = urlparse(self.url).netloc
+        self.scheme     = urlparse(self.url).scheme
+        
+        
+        self.browser    = "Chrome"
+        self.method     = "HEAD" if method=="HEAD" else "GET" 
         self.connection = "keep-alive" if conn_type=="keep-alive" else "close"
-        self.method = "HEAD" if method=="HEAD" else "GET" 
-        self.url = url
-        self.platform = platform
-        self.browser = "Chrome"
+
         
-        self.path = urlparse(self.url).path
+        if allow_encode :
+            self.encode = True
         
         if not self.path :                              #----> checking root of site self.path
             self.path = '/'
-        
-        self.host = urlparse(self.url).netloc
-        self.scheme = urlparse(self.url).scheme
     #_________________________________________________________
     
     def __spoofUserAgent__(self) :                      #----------> spoofing random user-agent for req : 2 browser and 
@@ -100,6 +105,7 @@ class SpoofHttpRequest :
     #_________________________________________________________
     
     def __spoofAccept__(self) :
+        
         if self.browser == "Firefox" :
             # ---> sometimes web servers have problem in sending [ image/apng ] to Firefox ...
             return "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n"  
@@ -110,17 +116,20 @@ class SpoofHttpRequest :
     def spoof(self) : # -> str
         
         # Spoofing HTTP HEAD req ... 
-        req = f"{self.method} {self.path} HTTP/1.1\r\n"             # ----> HEAD req to self.path
-        req += f"Host: {self.host}\r\n"                             # ----> adding self.host to resolve req
+        req = f"{self.method} {self.path} HTTP/1.1\r\n"                 # ----> HEAD req to self.path
+        req += f"Host: {self.host}\r\n"                                 # ----> adding self.host to resolve req
         
-        req += self.__spoofUserAgent__()                            # ----> User-Agent & browser spoofing
-        req += self.__spoofAccept__()                               # ----> accepting types
+        req += self.__spoofUserAgent__()                                # ----> User-Agent & browser spoofing
+        req += self.__spoofAccept__()                                   # ----> accepting types
         
-        req += f"Connection: {self.connection}\r\n"                 # ----> keep connection open and let page think script is a real user 
-        req += "Accept-Encoding: gzip, deflate\r\n"                 # ----> file compressing formats that client like 
-        req += "Accept-Language: en-US,en;q=0.9\r\n"                # ----> languages which client prefer
+        req += f"Connection: {self.connection}\r\n"                     # ----> keep connection open and let page think script is a real user
         
-        req += "Upgrade-Insecure-Requests: 1\r\n"                   # ----> upgrade http to https !
+        
+        if self.encode : req += "Accept-Encoding: gzip, deflate\r\n"    # ----> file compressing formats for client -> if use this must decode gzip or other .
+        
+        
+        req += "Accept-Language: en-US,en;q=0.9\r\n"                    # ----> languages which client prefer
+        req += "Upgrade-Insecure-Requests: 1\r\n"                       # ----> upgrade http to https !
         
         if self.browser != "Firefox" :
             req += "Sec-Fetch-Dest: document\r\n"       
@@ -128,10 +137,10 @@ class SpoofHttpRequest :
             req += "Sec-Fetch-Site: none\r\n"
             req += "Sec-Fetch-User: ?1\r\n"
         
-        req += "Cache-Control: max-age=0\r\n"                       #-----> clear system cache
-        if self.browser=="Firefox" : req += "Pragma: no-cache\r\n"  #-----> firefox old version header
+        req += "Cache-Control: max-age=0\r\n"                           #-----> clear system cache
+        if self.browser=="Firefox" : req += "Pragma: no-cache\r\n"      #-----> firefox old version header
         
-        req += "\r\n"                                               # ----> End of request 
+        req += "\r\n"                                                   # ----> End of request
         
         return req
     
